@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+        <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.js" charset="utf-8"></script>
+        <style>
+            body {
+                margin: 0;
+            }
+            .slide-img {
+                display: none;
+            }
+            /* 这个放上一个样式的下面，这样下面的样式就掩盖了上面的样式，顺序反了是不行的 */
+            .slide-img-active {
+                display: block;
+            }
+
+
+
+
+            /* 父元素必须声明position是非static，所以一般声明position为static，
+            这样父元素作为相对定位元素不脱离文档流，同时由于不指定top，left这些属性，
+            父元素就还在原来位置。
+
+            这样做的主要原因是在 mdn css position 文档中说了：
+            绝对定位元素香港对于最近的非static祖先元素定位
+            所以两个按钮要想垂直居中，其父元素一般是个套路，声明为relative。
+            parentElement {
+                position: relative;
+            }
+            childElement {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+            这四句话是垂直居中CSS的一个套路
+            */
+            .slide {
+                position: relative;
+                width: 730px;
+                height: 454px; /* 这里是审查元素得到的图片的宽和高，图片width必须明确指出，
+                                否则，这个元素作为div，默认宽度为页面宽度，高度为div应占高度（即图片高度） */
+            }
+
+            /* 先把两个botton移动到垂直居中，这里面top:50%以父元素作为参照系进行元素定位 */
+            .vertical-center {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+
+
+
+
+
+
+            /* 把左边的按钮移到左边 */
+            .slide-button-left {
+                left: 0;
+            }
+            /* 把右边的按钮移到右边 */
+            .slide-button-right {
+                right: 0;
+            }
+
+
+
+            .horizental-center {
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+            .slide-indicators {
+                bottom: 5%;
+            }
+            .slide-indicator {
+                display: inline-block;
+                height: 30px;
+                width: 30px;
+                text-align: center;
+                font-size: 28px;
+                background: black;
+                color: white;
+                border-radius: 50%;
+                margin: 10px;
+            }
+
+            .slide-indicator-active {
+                background: red;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="slide" data-active="0" data-imgs="3">
+            <img class="slide-img slide-img-active" src="1.jpg">
+            <img class="slide-img" src="2.jpg">
+            <img class="slide-img" src="3.jpg">
+            <button class="slide-button slide-button-left vertical-center" type="button">previous </button>
+            <button class="slide-button slide-button-right vertical-center" type="button">next</button>
+            <div class="slide-indicators horizental-center">
+                <div class="slide-indicator slide-indicator-active">1</div>
+                <div class="slide-indicator">2</div>
+                <div class="slide-indicator">3</div>
+            </div>
+        </div>
+
+<script>
+    var play = function (offset, animationDuration) {
+        var activeIndex = $('.slide').data('active')
+        var numberOfImgs = $('.slide').data('imgs')
+        var i = (activeIndex + offset + numberOfImgs) % numberOfImgs
+
+        //目前鼠标双击next按钮会出现bug
+        var currentImg = $('.slide-img-active')
+        var nextImg = $($('.slide-img')[i])
+
+        // 使用回调函数来做，当currentImgfadeout之后，删除class，再让下一个图片fadein
+        // 下一个图片fadein 完成之后，再添加class
+        // 这样就能达到一个图片fadeout之后，另一个图片才会fadein的效果
+        currentImg.fadeOut(animationDuration, function () {
+            currentImg.removeClass('slide-img-active')
+            nextImg.fadeIn(animationDuration, function () {
+                nextImg.addClass('slide-img-active')
+            })
+        })
+
+
+        $('.slide-indicator-active').removeClass('slide-indicator-active')
+        $($('.slide-indicator')[i]).addClass('slide-indicator-active')
+
+
+
+        $('.slide').data('active', i)
+    }
+
+    $('.slide-button').on('click', function (event) {
+        var button = $(event.target)
+        if (button.hasClass('slide-button-left')) {
+            play(-1, 300)
+        } else {
+            play(1, 300)
+        }
+    })
+</script>
+    </body>
+</html>
